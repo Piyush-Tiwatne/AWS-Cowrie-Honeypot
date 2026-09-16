@@ -1,60 +1,79 @@
 # Cowrie Installation
 
-## Overview
+## 1. Overview
 
-Cowrie is an open-source SSH and Telnet honeypot designed to log
-brute-force attempts and shell interaction performed by attackers.
+Cowrie is an open-source SSH and Telnet honeypot designed to monitor and log brute-force authentication attempts and shell interactions within an emulated environment.
 
-In this project, Cowrie was installed on an Ubuntu EC2 instance.
+In this project, Cowrie was installed on an Ubuntu Linux server running on AWS EC2.
 
-## 1. Activate the Python Virtual Environment
+---
 
-The Cowrie environment was activated using:
+## 2. Activate the Python Virtual Environment
 
+The Python virtual environment created during the Linux setup was activated using:
 
+```bash
 source ~/cowrie-env/bin/activate
+```
 
 After activation, the terminal displayed:
 
+```text
 (cowrie-env)
+```
 
-This keeps Cowrie's Python dependencies separated from the system
-Python installation.
+The virtual environment was used to keep Cowrie's Python dependencies separated from the system Python installation.
 
-##2. Install Cowrie
+---
 
-The Cowrie source code was downloaded into the cowrie user's home
-directory.
+## 3. Install Cowrie
 
-The project directory was:
+The Cowrie source code was downloaded into the dedicated `cowrie` user's home directory.
 
+The Cowrie project directory was:
+
+```text
 ~/cowrie
+```
 
-Cowrie was installed using:
+The installation was performed using:
 
+```bash
 cd ~/cowrie
 python -m pip install -e .
+```
 
-##3. Dependency Issue
+The `-e` option installs the project in editable mode, allowing the installed package to reference the source directory directly.
 
-During installation, installing the development dependencies caused
-a build issue involving the pytype package.
+---
 
-Since the development dependencies were not required to run the
-honeypot, the base Cowrie package was installed instead:
+## 4. Dependency Issue
 
+During the initial setup, installing Cowrie's development dependencies resulted in a build issue involving the `pytype` package.
+
+The development dependencies were not required for running the honeypot itself.
+
+Therefore, the base Cowrie package was installed using:
+
+```bash
 python -m pip install -e .
+```
 
-This allowed Cowrie to run successfully.
+This installation completed successfully and provided the packages required to operate the honeypot.
 
-##4. Verify Cowrie Installation
+---
 
-The Cowrie command-line interface was checked using:
+## 5. Verify Cowrie Installation
 
+After installation, the Cowrie command-line interface was tested using:
+
+```bash
 cowrie --help
+```
 
 The available commands included:
 
+```text
 init
 start
 stop
@@ -64,31 +83,53 @@ status
 shell
 bash
 sh
+```
 
-The installed Cowrie version was:
+The installed version was verified using:
 
+```bash
 cowrie --version
+```
 
-The project used Cowrie version:
+The project used:
 
-3.0.13
+```text
+Cowrie 3.0.13
+```
 
-##5. Important Installation Details
+---
 
-Cowrie was operated using the dedicated non-root cowrie Linux user.
+## 6. Installation Details
 
-The Python virtual environment was:
+The final Cowrie environment consisted of:
 
-~/cowrie-env
+| Component                  | Location / Configuration |
+| -------------------------- | ------------------------ |
+| Linux user                 | `cowrie`                 |
+| Python virtual environment | `~/cowrie-env`           |
+| Cowrie installation        | `~/cowrie`               |
+| Cowrie version             | `3.0.13`                 |
 
-The Cowrie installation directory was:
+Cowrie was operated using the dedicated non-root `cowrie` Linux user.
 
-~/cowrie
+The Python virtual environment kept Cowrie's project-specific dependencies separate from the system Python environment.
 
-This setup helped keep the honeypot environment isolated from the
-system Python installation.
+---
 
-Result
+## 7. Installation Verification
 
-Cowrie was successfully installed on the Ubuntu EC2 server and was
-ready for configuration and deployment as an SSH honeypot.
+The installation was considered successful after confirming that:
+
+* The Python virtual environment could be activated.
+* The Cowrie package was installed successfully.
+* The `cowrie` command was available.
+* Cowrie CLI commands were accessible.
+* The installed version was confirmed as **3.0.13**.
+
+---
+
+## 8. Result
+
+Cowrie was successfully installed on the Ubuntu EC2 server and verified using its command-line interface.
+
+The honeypot environment was ready for the next stage: **Cowrie configuration and SSH honeypot deployment**.
