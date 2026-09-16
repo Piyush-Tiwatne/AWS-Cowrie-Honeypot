@@ -1,0 +1,15 @@
+*.pem
+.env
+
+__pycache__/
+*.pyc
+
+cowrie/var/log/
+cowrie/var/lib/
+cowrie/var/run/
+
+venv/
+cowrie-env/
+geoip-env/
+
+cowrie_attack_map.html
