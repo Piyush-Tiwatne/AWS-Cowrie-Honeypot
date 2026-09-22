@@ -1,212 +1,337 @@
 # AWS Cowrie Honeypot – SSH Attack Monitoring System
 
-An AWS-based SSH honeypot project using **Cowrie** to capture, analyze, and visualize unsolicited SSH activity in a controlled environment.
+A cloud-based SSH honeypot deployed on AWS EC2 to capture, analyze, and visualize SSH connection activity using Cowrie and Python.
 
-## Overview
+---
 
-This project deploys **Cowrie**, an SSH honeypot, on an **AWS EC2 Ubuntu server**.
+## Project Overview
 
-Cowrie provides an emulated SSH environment that records activity such as:
+This project deploys a **Cowrie SSH honeypot** on an Ubuntu Linux server hosted on AWS EC2.
 
-* SSH connection attempts
-* Authentication activity
-* SSH client information
-* Shell commands
-* SSH session information
+The honeypot exposes a controlled SSH service that records connection attempts, authentication activity, commands, SSH client information, and HASSH fingerprints.
 
-Python scripts were developed to process the collected Cowrie JSON logs and analyze connection, authentication, client, command, and HASSH fingerprint activity.
+The collected JSON logs are analyzed using Python to identify repeated activity patterns and other characteristics of the observed SSH traffic.
 
-GeoIP data was also used to create an approximate geographic visualization of observed source IP addresses.
+The project also includes GeoIP-based visualization of observed source locations.
 
-> **Important:** Cowrie operates in an emulated environment. Authentication events recorded by Cowrie do not demonstrate compromise of the underlying EC2 host.
+> **Important:** Cowrie is an emulated environment. Successful authentication recorded by Cowrie does not mean that the AWS EC2 host was compromised.
 
 ---
 
 ## Architecture
 
 ```text
-                    Windows Machine
-                          │
-                          │ SSH
-                          ▼
-                ┌─────────────────────┐
-                │     AWS EC2         │
-                │    Ubuntu Linux     │
-                └──────────┬──────────┘
-                           │
-                           │ Port 2222
-                           ▼
-                ┌─────────────────────┐
-                │   Cowrie Honeypot   │
-                │   Emulated SSH      │
-                └──────────┬──────────┘
-                           │
-                           ▼
-                ┌─────────────────────┐
-                │   Cowrie JSON Logs  │
-                └──────────┬──────────┘
-                           │
-                           ▼
-                ┌─────────────────────┐
-                │  Python Analysis    │
-                └──────────┬──────────┘
-                           │
-                 ┌─────────┴─────────┐
-                 ▼                   ▼
-          Activity Analysis     GeoIP Data
-                                     │
-                                     ▼
-                             Folium Visualization
+Windows Test Machine
+        |
+        | SSH
+        v
+AWS EC2 Ubuntu Server
+        |
+        v
+Cowrie SSH Honeypot
+        |
+        v
+Cowrie JSON Logs
+        |
+        v
+Python Log Analysis
+        |
+        +------------------+
+        |                  |
+        v                  v
+Security Findings      GeoIP Mapping
 ```
 
 ### Network Configuration
 
-```text
-Port 22
-   ↓
-Administrative SSH
-   ↓
-EC2 Server Management
+| Service | Port | Purpose |
+|---|---:|---|
+| SSH | 22 | Administrative access |
+| Cowrie | 2222 | Honeypot SSH service |
 
-Port 2222
-   ↓
-Cowrie SSH Honeypot
-   ↓
-Unsolicited SSH Activity
-```
-
-Administrative SSH access was separated from the honeypot service.
+Port **22** was restricted for administrative access, while port **2222** was exposed for the Cowrie honeypot.
 
 ---
 
 ## Technologies Used
 
-| Technology   | Purpose                                        |
-| ------------ | ---------------------------------------------- |
-| AWS EC2      | Cloud server hosting                           |
-| Ubuntu Linux | Server operating system                        |
-| Cowrie       | SSH honeypot                                   |
-| Python       | Log processing and analysis                    |
-| JSON         | Structured honeypot logs                       |
-| SSH          | Remote administration and honeypot interaction |
-| Folium       | Interactive GeoIP visualization                |
-| GeoIP        | Approximate source IP geolocation              |
+- AWS EC2
+- Ubuntu Linux
+- Cowrie SSH Honeypot
+- Python
+- JSON
+- Folium
+- GeoIP
+- SSH
+- Git
+- GitHub
 
 ---
 
-## Project Features
+## Features
 
-* AWS EC2 deployment
-* Ubuntu Linux server administration
-* Dedicated non-root user for Cowrie
-* Python virtual environment
-* SSH honeypot on port `2222`
-* Authentication activity collection
-* SSH client information collection
-* Command activity logging
-* JSON log processing
-* Python-based activity analysis
-* Source IP analysis
-* HASSH fingerprint analysis
-* GeoIP visualization
-* Security-focused data sanitization
+- AWS EC2-based honeypot deployment
+- SSH activity collection using Cowrie
+- Authentication event monitoring
+- Username analysis
+- Command analysis
+- Source IP analysis
+- SSH client identification
+- HASSH fingerprint analysis
+- Activity-by-date analysis
+- GeoIP visualization
+- Python-based automated log analysis
+- Separation of administrative SSH and honeypot SSH
 
 ---
 
 ## Data Collection
 
-The Cowrie honeypot was deployed on an AWS EC2 Ubuntu server and allowed to collect unsolicited SSH activity during the project data-collection period.
+Cowrie records security events in JSON format.
 
-The collected logs contained structured events related to SSH sessions, authentication, clients, commands, and SSH handshake information.
+The analysis focuses on the following event types:
 
-The logs were analyzed locally using Python.
+| Event | Purpose |
+|---|---|
+| `cowrie.session.connect` | Records incoming connections |
+| `cowrie.login.success` | Records authentication accepted by Cowrie |
+| `cowrie.login.failed` | Records failed authentication attempts |
+| `cowrie.command.input` | Records commands entered into the honeypot |
+| `cowrie.client.version` | Records client-reported SSH information |
 
-Raw logs containing collected network data were not published in the repository.
+The project-owner test IP addresses were excluded from the final external-activity analysis.
 
 ---
 
 ## Analysis Results
 
-During the project data-collection period, the honeypot recorded:
+The collected Cowrie logs were analyzed using a Python script.
 
-| Metric                     |     Result |
-| -------------------------- | ---------: |
-| SSH connection sessions    | **28,897** |
-| Unique external source IPs |     **43** |
-| Successful-login events    | **28,830** |
-| Failed-login events        |      **1** |
-
-The **43 unique external source IPs** were calculated after excluding project-owner test traffic.
-
-The total connection count includes the project's own test session.
-
-> **Authentication interpretation:** `cowrie.login.success` represents authentication accepted by Cowrie's emulated environment. It does not demonstrate successful compromise of the underlying AWS EC2 host.
+| Metric | Result |
+|---|---:|
+| Log files analyzed | 10 |
+| Total connections | 28,905 |
+| Connections after filtering | 28,902 |
+| Unique source IPs | 47 |
+| Successful login events | 28,831 |
+| Failed login events | 1 |
+| Malformed JSON lines | 0 |
+| Most frequent command | `echo -e "\x6F\x6B"` |
+| Most frequent command count | 28,797 |
+| Most observed client | `SSH-2.0-Go` |
+| Most observed client count | 28,837 |
+| Dominant HASSH fingerprint count | 28,798 |
 
 ---
 
 ## Observed Activity
 
-The collected logs showed several recurring activity patterns:
+The analysis showed highly repetitive SSH connection activity.
 
-* Repeated SSH connections
-* Repeated authentication events
-* Multiple SSH client implementations
-* Repeated command sequences
-* Basic system-information discovery commands
-* Recurring SSH handshake characteristics
+The highest-activity source generated **28,799 connections**.
 
-Example commands observed included:
+The most frequently attempted username was:
 
-```text
-uname
-whoami
-pwd
-ls
-```
+`root`
 
-The frequency and repetition of these patterns suggest that a significant portion of the observed activity was automated or scripted.
+The most frequently observed command was:
 
-The project does not attempt to identify a specific attacker, malware family, or tool based solely on these observations.
+`echo -e "\x6F\x6B"`
+
+This command appeared **28,797 times**.
+
+The highly repetitive connection and command patterns indicate automated or scripted activity.
+
+---
+
+## Command Analysis
+
+The most frequently observed command was **`echo -e "\x6F\x6B"`** with **28,797 occurrences**.
+
+| Command | Count |
+|---|---:|
+| `echo -e "\x6F\x6B"` | 28,797 |
+| `/bin/./uname -s -v -n -r -m` | 29 |
+| `echo 1 > /dev/null && cat /bin/echo` | 1 |
+
+The repeated `uname` command represents system-information discovery within the emulated environment.
+
+The highly repetitive command pattern indicates automated or scripted activity.
+
+---
+
+## Username Analysis
+
+The most frequently observed usernames were:
+
+| Username | Count |
+|---|---:|
+| `root` | 28,801 |
+| `admin` | 6 |
+| `elastic` | 3 |
+| `apache` | 2 |
+| `app` | 2 |
+| `centos` | 2 |
+| `docker` | 2 |
+| `elsearch` | 2 |
+| `es` | 2 |
+| `appuser` | 1 |
+
+The large number of `root` authentication attempts demonstrates that privileged account names were heavily targeted.
+
+---
+
+## Observed Client and Protocol Strings
+
+Cowrie recorded several client and protocol identification strings.
+
+| Client / Protocol String | Count |
+|---|---:|
+| `SSH-2.0-Go` | 28,837 |
+| `SSH-2.0-paramiko_3.4.1` | 8 |
+| `GET / HTTP/1.1` | 6 |
+| `MGLNDD_13.204.62.18_2222` | 6 |
+| `SSH-2.0-libssh_0.7.4` | 6 |
+| `SSH-2.0-russh_0.51.1` | 4 |
+| `GET /favicon.ico HTTP/1.1` | 2 |
+| `SSH-2.0-perlssh` | 2 |
+| `SSH-2.0-libssh2_1.11.1` | 1 |
+
+The `SSH-2.0-Go` client string was the dominant observed client identifier.
+
+These strings describe client-reported protocol information and do not independently identify a specific attacker.
 
 ---
 
 ## HASSH Analysis
 
-Cowrie SSH handshake information was analyzed to identify recurring HASSH fingerprints.
+HASSH fingerprints were used to group SSH connections according to their SSH handshake characteristics.
 
-HASSH fingerprints can help group connections that exhibit similar SSH handshake characteristics.
+| HASSH Fingerprint | Count |
+|---|---:|
+| `01ca35584ad5a1b66cf6a9846b5b2821` | 28,798 |
+| `16443846184eafde36765c9bab2f4397` | 29 |
+| `87e3d9ffee0540b0390f8a5b9c343c08` | 8 |
+| `bc3aee897af7d3feb9fc37b89c7d15c9` | 7 |
+| `e37f354a101aff5871ba233aa82b84ec` | 6 |
+| `1b8acd46a07d2dc9854db9ec4044c45c` | 4 |
+| `e54ef3ec27fe1fea7ab64d3fa05359fd` | 2 |
+| `3c0eaacec19ba322a90a5541dac09a06` | 2 |
+| Other fingerprints | 2 |
 
-They were used in this project as an additional method for identifying recurring connection patterns.
+The dominant fingerprint appeared in **28,798 connections**, showing a highly repetitive SSH connection pattern.
 
-> A HASSH fingerprint does not independently identify a specific attacker.
+HASSH grouping can indicate similar SSH client behavior, but it should not be treated as proof that all connections came from the same attacker.
+
+---
+
+## Activity by Date
+
+| Date | Connections |
+|---|---:|
+| 2026-09-01 | 36 |
+| 2026-09-02 | 28,809 |
+| 2026-09-03 | 25 |
+| 2026-09-04 | 13 |
+| 2026-09-05 | 7 |
+| 2026-09-06 | 5 |
+| 2026-09-07 | 1 |
+| 2026-09-16 | 3 |
+| 2026-09-17 | 1 |
+| 2026-09-22 | 2 |
+
+The highest observed connection activity occurred on **2026-09-02**, with **28,809 connections**.
 
 ---
 
 ## GeoIP Visualization
 
-Source IP addresses were processed using GeoIP information and visualized using **Folium**.
+The project includes a GeoIP visualization of observed source locations.
 
-The visualization provides an approximate geographic representation of the observed source addresses.
+The map is generated using Python and Folium.
 
-> GeoIP information does not establish the physical location or identity of an attacker.
+GeoIP information is approximate and is used only for visualization and analysis.
 
-The generated interactive map is not included in the public repository because it contains collected source IP information.
+No raw source IP data is included in the public repository beyond the summarized analysis results.
 
 ---
 
-## Data Privacy
+## Manual SSH Test
 
-Because honeypots collect information about external systems, the project was designed to avoid publishing sensitive collected data.
+A controlled SSH connection was performed against the Cowrie listener to verify that the honeypot accepted connections and recorded shell activity.
 
-The following were excluded from the public repository:
+Example test commands included:
 
-* Raw Cowrie logs
-* Source IP addresses
-* Raw passwords
-* Private SSH keys
-* GeoIP maps containing collected IP information
+```text
+whoami
+ls
+pwd
+ps aux
+exit
+```
 
-The repository contains sanitized results, analysis methodology, and project documentation.
+The commands were captured by Cowrie and subsequently processed by the Python analysis script.
+
+---
+
+## Python Analysis
+
+The project includes a lightweight Python analysis script:
+
+```text
+scripts/analyze_cowrie.py
+```
+
+The script processes Cowrie JSON logs and generates a summary report containing:
+
+- Connection statistics
+- Source IP activity
+- Username activity
+- Commands
+- SSH client strings
+- HASSH fingerprints
+- Activity by date
+- Key observations
+
+The generated report is saved locally and is not included in the public repository.
+
+---
+
+## Project Screenshots
+
+### AWS EC2 Deployment
+
+![AWS EC2 Instance](screenshots/01-ec2-instance.png)
+
+### Cowrie Configuration
+
+![Cowrie Configuration](screenshots/02-cowrie-configuration1.png)
+
+![Cowrie Configuration](screenshots/02-cowrie-configuration2.png)
+
+### SSH Honeypot Testing
+
+![SSH Honeypot Test](screenshots/03-ssh-honeypot-test.png)
+
+### Analysis Report
+
+![Cowrie Analysis Report](screenshots/04-ssh-honeypot-Report.png)
+
+### GeoIP Visualization
+
+![GeoIP Map](screenshots/05-geoip-map.png)
+
+### Command Analysis
+
+![Command Analysis](screenshots/06-command-analysis.png)
+
+### Captured Commands
+
+![Cowrie Command Capture](screenshots/07-command-capture.png)
+
+### Client Analysis
+
+![Observed Client Analysis](screenshots/08-ssh-client-analysis.png)
 
 ---
 
@@ -216,6 +341,10 @@ The repository contains sanitized results, analysis methodology, and project doc
 aws-cowrie-honeypot/
 │
 ├── README.md
+├── .gitignore
+│
+├── analysis/
+│   └── results.md
 │
 ├── docs/
 │   ├── 01-aws-ec2-setup.md
@@ -226,92 +355,141 @@ aws-cowrie-honeypot/
 │   ├── 06-log-analysis.md
 │   └── 07-challenges.md
 │
-├── scripts/
-│   ├── analyze_cowrie.py
-│   └── cowrie_map.py
-│
 ├── screenshots/
+│   ├── 01-ec2-instance.png
+│   ├── 02-cowrie-configuration1.png
+│   ├── 02-cowrie-configuration2.png
+│   ├── 03-ssh-honeypot-test.png
+│   ├── 04-cowrie-honeypot-report.png
+│   ├── 05-geoip-map.png
+│   ├── 06-command-analysis.png
+│   ├── 07-command-capture.png
+│   └── 08-ssh-client-analysis.png
 │
-├── analysis/
-│   └── results.md
-│
-└── .gitignore
+└── scripts/
+    ├── analyze_cowrie.py
+    └── cowrie_map.py
 ```
 
 ---
 
 ## Documentation
 
-Detailed project documentation is organized into separate sections:
+Detailed setup and implementation steps are available in the `docs/` directory.
 
-| Document                     | Description                                         |
-| ---------------------------- | --------------------------------------------------- |
-| `01-aws-ec2-setup.md`        | AWS EC2 deployment and Security Group configuration |
-| `02-linux-setup.md`          | Ubuntu preparation and dedicated Cowrie user        |
-| `03-cowrie-installation.md`  | Cowrie installation and dependency handling         |
-| `04-cowrie-configuration.md` | Hostname, SSH listener, and port configuration      |
-| `05-testing.md`              | Honeypot connectivity and log-generation testing    |
-| `06-log-analysis.md`         | Python-based Cowrie log analysis                    |
-| `07-challenges.md`           | Deployment challenges and lessons learned           |
-| `analysis/results.md`        | Sanitized analysis results                          |
+| Document | Description |
+|---|---|
+| [AWS EC2 Setup](docs/01-aws-ec2-setup.md) | EC2 instance creation and network configuration |
+| [Linux Setup](docs/02-linux-setup.md) | Ubuntu and user configuration |
+| [Cowrie Installation](docs/03-cowrie-installation.md) | Cowrie installation and environment setup |
+| [Cowrie Configuration](docs/04-cowrie-configuration.md) | Honeypot configuration and listener setup |
+| [Testing](docs/05-testing.md) | Controlled SSH testing |
+| [Log Analysis](docs/06-log-analysis.md) | JSON log analysis and reporting |
+| [Challenges](docs/07-challenges.md) | Problems encountered and solutions |
+
+Detailed analysis results are available in:
+
+[analysis/results.md](analysis/results.md)
 
 ---
 
 ## Challenges and Lessons Learned
 
-The project involved several practical troubleshooting challenges, including:
+### 1. Separating Administrative SSH and Honeypot SSH
 
-* Cowrie dependency installation issues
-* AWS Security Group configuration
-* SSH connection timeouts
-* Separation of administrative and honeypot ports
-* Correct interpretation of Cowrie event types
-* Avoiding double-counting during log analysis
-* Handling GeoIP API failures
-* Protecting collected network data
+Port 22 was used for secure administrative access while port 2222 was used by Cowrie.
 
-These challenges provided hands-on experience with AWS, Linux, SSH, networking, Python, log analysis, and security monitoring.
+This separation allowed the EC2 instance to remain manageable without exposing the administrative SSH service as the honeypot.
+
+### 2. AWS Security Group Configuration
+
+The Security Group had to be configured carefully to allow the required honeypot traffic while restricting administrative SSH access.
+
+### 3. Running Cowrie as a Dedicated User
+
+Cowrie was configured under a dedicated non-root Linux user rather than running the honeypot directly as root.
+
+### 4. Log Analysis
+
+The raw Cowrie JSON logs contained a large number of events.
+
+A Python script was developed to process the logs and convert them into a readable security analysis report.
+
+### 5. Filtering Manual Test Activity
+
+Manual testing generated additional events in the logs.
+
+Known project-owner test IP addresses were therefore excluded from the final external-activity analysis.
 
 ---
 
 ## Limitations
 
-The results should be interpreted within the limitations of the project:
-
-* The dataset represents one honeypot deployment and collection period.
-* The results are not representative of all Internet SSH activity.
-* An IP address does not necessarily represent an individual attacker.
-* GeoIP locations are approximate.
-* Cowrie provides an emulated environment rather than a production SSH server.
-* Honeypot authentication events do not demonstrate compromise of the underlying EC2 host.
-* Observed activity alone is insufficient to conclusively identify a specific attacker, malware family, or tool.
+- A source IP address does not necessarily represent a unique attacker.
+- GeoIP information is approximate.
+- Client strings and HASSH fingerprints describe connection characteristics but do not independently identify an attacker.
+- Cowrie provides an emulated environment rather than a real production SSH shell.
+- Successful Cowrie authentication does not indicate compromise of the AWS EC2 host.
+- Observed commands alone are not sufficient to identify a specific malware family or threat actor.
+- The analysis represents activity observed during the project's collection period and should not be treated as a complete representation of Internet-wide SSH activity.
 
 ---
 
-## Key Learning Outcomes
+## Security and Data Privacy
+
+The public repository intentionally does not contain:
+
+- Raw Cowrie logs
+- Passwords
+- Private SSH keys
+- Complete raw session data
+- Sensitive AWS credentials
+- Local configuration containing secrets
+
+Only summarized analysis results and selected screenshots are included.
+
+---
+
+## Learning Outcomes
 
 This project provided practical experience with:
 
-* **AWS EC2 deployment**
-* **Ubuntu Linux administration**
-* **SSH and networking**
-* **AWS Security Groups**
-* **Honeypot deployment**
-* **Python scripting**
-* **JSON log analysis**
-* **SSH client and session analysis**
-* **HASSH fingerprint analysis**
-* **GeoIP visualization**
-* **Security monitoring**
-* **Data privacy and sanitization**
-* **Cloud troubleshooting**
+- AWS EC2 deployment
+- Ubuntu Linux administration
+- SSH configuration
+- Network Security
+- Honeypot deployment
+- Cowrie
+- JSON log analysis
+- Python scripting
+- SSH client analysis
+- HASSH fingerprinting
+- GeoIP visualization
+- Security monitoring
+- Git and GitHub documentation
 
 ---
 
 ## Conclusion
 
-The project successfully deployed a Cowrie SSH honeypot on an AWS EC2 Ubuntu server and collected unsolicited SSH activity.
+This project demonstrates a complete workflow for deploying an SSH honeypot in a cloud environment and analyzing the resulting security telemetry.
 
-Python was then used to process the resulting JSON logs and analyze connection sessions, authentication activity, SSH clients, commands, and HASSH fingerprints.
+The workflow consists of:
 
-The project demonstrates a practical workflow for deploying a cloud-based honeypot, collecting security telemetry, processing structured logs, and interpreting observed SSH activity while considering data privacy and the limitations of honeypot-based analysis.
+```text
+AWS EC2
+   ↓
+Ubuntu Linux
+   ↓
+Cowrie SSH Honeypot
+   ↓
+JSON Security Logs
+   ↓
+Python Log Analysis
+   ↓
+Security Findings
+   ↓
+Visualization and Documentation
+```
+
+The project combines **cloud infrastructure, Linux, networking, cybersecurity monitoring, Python automation, and security analysis** into a single practical implementation.
