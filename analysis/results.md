@@ -1,172 +1,175 @@
-# Analysis Results
+# Cowrie SSH Honeypot Analysis Results
 
-## 1. Data Collection
+## 1. Collection Summary
 
-The Cowrie SSH honeypot was deployed on an AWS EC2 Ubuntu server to collect unsolicited SSH activity during the project data-collection period.
+The Cowrie JSON logs were analyzed using a Python script. The analysis covered 10 log files and excluded three known project-owner test IP addresses.
 
-Cowrie recorded authentication attempts, SSH sessions, client information, and commands executed within its emulated environment.
+| Metric | Result |
+|---|---:|
+| Log files analyzed | 10 |
+| Total connections | 28,905 |
+| Connections after filtering | 28,902 |
+| Unique source IPs | 47 |
+| Successful login events | 28,831 |
+| Failed login events | 1 |
+| Malformed JSON lines | 0 |
 
-The collected Cowrie JSON logs were analyzed locally using Python.
-
----
-
-## 2. Analysis Method
-
-The analysis focused on the following aspects of the collected SSH activity:
-
-* Number of SSH connection sessions
-* Source IP activity
-* Authentication attempts
-* SSH client information
-* Commands executed by connecting sessions
-* Repeated and automated activity patterns
-* Approximate geographic distribution of source IP addresses
-
-Raw passwords and source IP addresses were not included in the public repository.
+> Cowrie login-success events represent authentication accepted by the honeypot emulation. They do not indicate successful compromise of the AWS EC2 host.
 
 ---
 
-## 3. Activity Summary
+## 2. Top Source IPs
 
-| Metric                     | Result |
-| -------------------------- | -----: |
-| SSH connection sessions    | 28,897 |
-| Unique external source IPs |     43 |
-| Successful-login events    | 28,830 |
-| Failed-login events        |      1 |
+The highest-volume source generated 28,799 connection events.
 
-> **Note:** Cowrie `login.success` events represent authentication accepted by the honeypot's emulated environment. They do not demonstrate compromise of the underlying AWS EC2 host.
+| Source IP | Connections |
+|---|---:|
+| 8.213.218.35 | 28,799 |
+| 138.68.63.15 | 30 |
+| 44.250.212.125 | 8 |
+| 47.74.213.140 | 3 |
+| 8.219.140.39 | 3 |
+| 101.200.184.113 | 3 |
+| 165.232.148.53 | 2 |
+| 20.40.254.159 | 2 |
+| 47.80.21.54 | 2 |
+| 20.118.236.47 | 2 |
 
----
-
-## 4. Observed Activity
-
-### 4.1 Source IP Activity
-
-The honeypot received SSH connections from multiple external source IP addresses.
-
-The collected data showed that a single source address generated the majority of the recorded connections.
-
-Source IP addresses are not included in this public repository to avoid publishing collected network data.
+The results show that most observed connection activity came from a single highly repetitive source.
 
 ---
 
-### 4.2 Authentication Activity
+## 3. Username Analysis
 
-The logs contained repeated authentication attempts using commonly targeted usernames.
+The most frequently attempted username was `root`.
 
-Authentication activity was analyzed locally to identify repeated login patterns.
+| Username | Attempts |
+|---|---:|
+| root | 28,801 |
+| admin | 6 |
+| elastic | 3 |
+| apache | 2 |
+| app | 2 |
+| centos | 2 |
+| docker | 2 |
+| elsearch | 2 |
+| es | 2 |
+| appuser | 1 |
 
-Raw passwords collected by the honeypot are not included in the public repository.
+The dominance of `root` indicates repeated attempts to access the SSH service using a commonly targeted administrative account.
 
 ---
 
-### 4.3 SSH Client Information
+## 4. Command Analysis
 
-Multiple SSH client implementations were observed in the Cowrie logs, including:
-
-* Go-based SSH clients
-* Paramiko-based SSH clients
-
-Client information was analyzed to identify recurring connection and authentication patterns.
-
----
-
-### 4.4 Command Activity
-
-Several basic system and environment discovery commands were observed, including:
+The most frequently observed command was:
 
 ```text
-uname
-whoami
-pwd
-ls
-```
+echo -e "\x6F\x6B"
 
-Highly repetitive command patterns were also observed across multiple sessions.
+with 28,797 occurrences.
 
-For example, `uname` can provide information about the operating system and kernel details exposed by the emulated environment.
+Command	Count
+echo -e "\x6F\x6B"	28,797
+/bin/./uname -s -v -n -r -m	29
+echo 1 > /dev/null && cat /bin/echo	1
 
----
+The highly repetitive command pattern indicates automated or scripted activity.
 
-## 5. Automated Activity
+The repeated uname command represents system-information discovery within the emulated environment.
 
-The high frequency of repeated connections, authentication events, client patterns, and command sequences suggests that a significant portion of the observed activity was automated or scripted.
+5. Observed Client and Protocol Strings
 
-The analysis focuses on observable activity within the honeypot and does not attempt to identify a specific attacker, malware family, or tool based solely on these observations.
+Cowrie recorded several client and protocol identification strings.
 
----
+Client / Protocol String	Count
+SSH-2.0-Go	28,837
+SSH-2.0-paramiko_3.4.1	8
+GET / HTTP/1.1	6
+MGLNDD_13.204.62.18_2222	6
+SSH-2.0-libssh_0.7.4	6
+SSH-2.0-russh_0.51.1	4
+GET /favicon.ico HTTP/1.1	2
+SSH-2.0-perlssh	2
+SSH-2.0-libssh2_1.11.1	1
 
-## 6. GeoIP Visualization
+The SSH-2.0-Go client string was the dominant observed client identifier.
 
-The collected source IP addresses were processed using GeoIP information and visualized using Folium.
+These strings identify client-reported protocol information; they do not independently identify a specific attacker.
 
-The visualization provides an approximate geographic location associated with each IP address.
+6. HASSH Analysis
 
-> **Important:** GeoIP information does not identify the physical location or identity of an attacker. IP-based geographic information is approximate and may represent a VPN, proxy, hosting provider, or other intermediary.
+HASSH fingerprints were used to group SSH connections according to their SSH handshake characteristics.
 
-The generated interactive map is not included in the public repository because it contains collected source IP information.
+HASSH Fingerprint	Count
+01ca35584ad5a1b66cf6a9846b5b2821	28,798
+16443846184eafde36765c9bab2f4397	29
+87e3d9ffee0540b0390f8a5b9c343c08	8
+bc3aee897af7d3feb9fc37b89c7d15c9	7
+e37f354a101aff5871ba233aa82b84ec	6
+1b8acd46a07d2dc9854db9ec4044c45c	4
+e54ef3ec27fe1fea7ab64d3fa05359fd	2
+3c0eaacec19ba322a90a5541dac09a06	2
+Other fingerprints	2
 
----
+The dominant fingerprint appeared in 28,798 connections, showing a highly repetitive SSH connection pattern.
 
-## 7. Key Findings
+HASSH grouping can indicate similar SSH client behavior, but it should not be treated as proof that all connections came from the same attacker.
 
-The analysis provided practical observations about unsolicited SSH activity received by the honeypot:
+7. Activity by Date
 
-* The honeypot recorded **28,897 SSH connection sessions**.
-* Activity originated from **43 unique external source IP addresses**.
-* Repeated authentication activity was observed.
-* Multiple SSH client implementations were identified.
-* Basic system-discovery commands such as `uname`, `whoami`, `pwd`, and `ls` were observed.
-* Repeated connection and command patterns indicated substantial automated or scripted activity.
-* GeoIP visualization provided an approximate geographic view of the observed source addresses.
+Connection activity was distributed across the following dates:
 
----
+Date	Connections
+2026-09-01	36
+2026-09-02	28,809
+2026-09-03	25
+2026-09-04	13
+2026-09-05	7
+2026-09-06	5
+2026-09-07	1
+2026-09-16	3
+2026-09-17	1
+2026-09-22	2
 
-## 8. Key Learnings
+The highest observed connection activity occurred on 2026-09-02.
 
-The project provided practical experience with:
-
-* AWS EC2 deployment
-* Ubuntu Linux administration
-* SSH and networking
-* Cowrie honeypot deployment and operation
-* JSON log processing
-* Python-based data analysis
-* SSH session and client analysis
-* GeoIP visualization using Folium
-* Security monitoring and observation
-
----
-
-## 9. Limitations
+8. Key Findings
+The honeypot recorded 28,905 SSH connection events.
+After removing three known project-owner test IPs, 28,902 external connection events remained.
+47 unique source IPs were observed.
+One source generated 28,799 connections, representing the majority of observed activity.
+The username root was the most frequently attempted username.
+The command echo -e "\x6F\x6B" was observed 28,797 times, indicating highly repetitive automated activity.
+SSH-2.0-Go was the most frequently observed client string.
+The dominant HASSH fingerprint appeared in 28,798 connections.
+The results demonstrate how a honeypot can capture and analyze repeated SSH activity without exposing the production system.
+9. Analysis Limitations
 
 The analysis has several limitations:
 
-1. **Limited dataset**
-   The dataset represents activity collected by a single honeypot deployment during a specific collection period.
+A source IP address does not necessarily represent a unique attacker.
+GeoIP information is approximate and should not be treated as an exact physical location.
+Client strings and HASSH fingerprints describe observed connection characteristics but do not independently identify an attacker.
+Cowrie operates as an emulated environment; successful honeypot authentication does not mean the AWS EC2 host was compromised.
+The collected commands provide behavioral evidence but are not sufficient by themselves to identify a specific malware family or threat actor.
+The analysis excludes the project's known manual testing IP addresses to reduce contamination of the external activity results.
+10. Conclusion
 
-2. **Not representative of all Internet SSH activity**
-   The observed activity should not be treated as representative of global or general Internet-wide SSH activity.
+The analysis demonstrates the use of Cowrie and Python to collect and investigate SSH activity against a public-facing honeypot.
 
-3. **IP address attribution**
-   An IP address does not necessarily represent an individual attacker. Addresses may belong to shared infrastructure, proxies, VPNs, cloud providers, or compromised systems.
+The collected data was analyzed across connection sources, usernames, commands, client strings, HASSH fingerprints, and activity over time. The results showed highly repetitive SSH activity, particularly from automated connection patterns.
 
-4. **GeoIP accuracy**
-   GeoIP information provides an approximate location and should not be interpreted as the physical location of an attacker.
+The project demonstrates a practical workflow:
 
-5. **Emulated environment**
-   Cowrie provides an emulated SSH environment rather than a real production SSH server.
-
-6. **Authentication interpretation**
-   Cowrie authentication events occur within the honeypot's emulated environment and should not be interpreted as confirmed compromise of the underlying AWS EC2 host.
-
----
-
-## 10. Conclusion
-
-The Cowrie deployment successfully collected and analyzed unsolicited SSH activity against an AWS EC2-hosted honeypot.
-
-The analysis demonstrated how honeypot logs can be used to examine connection patterns, authentication activity, SSH clients, command execution, and approximate source locations.
-
-The project also provided practical experience in combining **AWS, Linux, SSH, Python, log analysis, and security monitoring** into a hands-on cybersecurity monitoring system.
+AWS EC2
+   ↓
+Ubuntu Linux
+   ↓
+Cowrie SSH Honeypot
+   ↓
+JSON Security Logs
+   ↓
+Python Log Analysis
+   ↓
+Security Findings
