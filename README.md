@@ -303,35 +303,41 @@ The generated report is saved locally and is not included in the public reposito
 
 ![AWS EC2 Instance](screenshots/01-ec2-instance.png)
 
-### Cowrie Configuration
+### EC2 Security Group Configuration
 
-![Cowrie Configuration](screenshots/02-cowrie-configuration1.png)
+![EC2 Security Group](screenshots/02-ec2-security-group.png)
 
-![Cowrie Configuration](screenshots/02-cowrie-configuration2.png)
+### Cowrie Configuration — Listen Endpoint
+
+![Cowrie Listen Endpoint](screenshots/03a-cowrie-listen-endpoint.png)
+
+### Cowrie Configuration — Hostname
+
+![Cowrie Hostname](screenshots/03b-cowrie-hostname.png)
 
 ### SSH Honeypot Testing
 
-![SSH Honeypot Test](screenshots/03-ssh-honeypot-test.png)
+![SSH Honeypot Test](screenshots/04-ssh-honeypot-test.png)
 
-### Analysis Report
+### Final Analysis — Summary
 
-![Cowrie Analysis Report](screenshots/04-ssh-honeypot-Report.png)
+![Final Analysis Summary](screenshots/05a-final-analysis-summary.png)
 
-### GeoIP Visualization
+### Final Analysis — Details
 
-![GeoIP Map](screenshots/05-geoip-map.png)
+![Final Analysis Details](screenshots/05b-final-analysis-details.png)
 
 ### Command Analysis
 
 ![Command Analysis](screenshots/06-command-analysis.png)
 
-### Captured Commands
+### Client and HASSH Analysis
 
-![Cowrie Command Capture](screenshots/07-command-capture.png)
+![Client and HASSH Analysis](screenshots/07-client-analysis.png)
 
-### Client Analysis
+### GeoIP Visualization
 
-![Observed Client Analysis](screenshots/08-ssh-client-analysis.png)
+![GeoIP Map](screenshots/08-geoip-map.png)
 
 ---
 
