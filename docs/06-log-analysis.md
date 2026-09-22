@@ -203,11 +203,7 @@ Three known project-owner test IP addresses were excluded when calculating exter
 
 After filtering, 47 unique source IP addresses remained in the external activity dataset.
 
-The detailed results are documented separately in:
-
-```text
-analysis/results.md
-```
+The detailed results are documented separately in the [analysis results](../analysis/results.md).
 
 ---
 
@@ -391,8 +387,4 @@ The final analysis recorded **28,905 SSH connection sessions**. After excluding 
 
 The analysis demonstrated how honeypot logs can be programmatically processed to identify recurring SSH activity patterns and support security monitoring and investigation.
 
-Detailed numerical findings are available in:
-
-```text
-analysis/results.md
-```
+The detailed results are documented separately in the [analysis results](../analysis/results.md).
